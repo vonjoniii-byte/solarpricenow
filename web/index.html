@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solar Price Now</title>
+  <style>
+    /* Loading shell — visible during CanvasKit WASM load (~1–2s on mobile 3G).
+       Prevents blank-white flash. See UX_SPEC.md §2.1. */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    #loading-shell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      background: #ffffff;
+    }
+
+    /* Placeholder logo area: 120×40px light-grey rounded rect */
+    .logo-placeholder {
+      width: 120px;
+      height: 40px;
+      background: #E5E7EB;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    /* Shimmer loading bar */
+    .loading-bar-container {
+      width: 200px;
+      height: 4px;
+      background: #E5E7EB;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .loading-bar-inner {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        #E5E7EB 0%,
+        #D1D5DB 50%,
+        #E5E7EB 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% center;
+      }
+      100% {
+        background-position: -200% center;
+      }
+    }
+
+    .loading-caption {
+      font-size: 13px;
+      color: #6B7280;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading shell — replaced by Flutter CanvasKit when engine is ready -->
+  <div id="loading-shell">
+    <div class="logo-placeholder"></div>
+    <div class="loading-bar-container">
+      <div class="loading-bar-inner"></div>
+    </div>
+    <span class="loading-caption">Loading…</span>
+  </div>
+
+  <script>
+    window.addEventListener('flutter-first-frame', function() {
+      var shell = document.getElementById('loading-shell');
+      if (shell) {
+        shell.style.display = 'none';
+      }
+    });
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
