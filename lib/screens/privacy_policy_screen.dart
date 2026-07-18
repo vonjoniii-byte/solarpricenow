@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/spacing.dart';
+import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
