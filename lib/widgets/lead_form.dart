@@ -2,6 +2,7 @@
 // Lead capture form with 4 fields + honeypot.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/spacing.dart';
@@ -13,12 +14,14 @@ class LeadFormData {
   final String email;
   final String phone;
   final String postcode;
+  final bool marketingOptIn;
 
   const LeadFormData({
     required this.name,
     required this.email,
     required this.phone,
     required this.postcode,
+    this.marketingOptIn = false,
   });
 }
 
@@ -27,10 +30,12 @@ class LeadForm extends StatefulWidget {
   final bool isLoading;
   final String? apiError;
   final String submitLabel;
+  final VoidCallback onPrivacyPolicyTap;
 
   const LeadForm({
     super.key,
     required this.onSubmit,
+    required this.onPrivacyPolicyTap,
     this.isLoading = false,
     this.apiError,
     this.submitLabel = 'See My Recommendation',
@@ -48,6 +53,9 @@ class LeadFormState extends State<LeadForm> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _postcodeController = TextEditingController();
   final TextEditingController _honeypotController = TextEditingController();
+
+  bool _consentGiven = false;
+  bool _marketingOptIn = false;
 
   @override
   void dispose() {
@@ -117,12 +125,17 @@ class LeadFormState extends State<LeadForm> {
       return;
     }
 
+    // Belt-and-braces — the submit button is already disabled until this is
+    // ticked, but never submit without consent even if that state changes.
+    if (!_consentGiven) return;
+
     await widget.onSubmit(
       LeadFormData(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         phone: _phoneController.text.replaceAll(RegExp(r'\D'), ''),
         postcode: _postcodeController.text.trim(),
+        marketingOptIn: _marketingOptIn,
       ),
     );
   }
@@ -217,11 +230,21 @@ class LeadFormState extends State<LeadForm> {
                   ),
                 ),
 
+              // Consent checkbox — required. Submit stays disabled until ticked.
+              _consentCheckbox(),
+              const SizedBox(height: 10),
+
+              // Marketing opt-in — optional, unticked by default.
+              _marketingCheckbox(),
+              const SizedBox(height: 16),
+
               // Submit button
               SizedBox(
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: widget.isLoading ? null : _handleSubmit,
+                  onPressed: (widget.isLoading || !_consentGiven)
+                      ? null
+                      : _handleSubmit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.surface,
@@ -282,6 +305,106 @@ class LeadFormState extends State<LeadForm> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _consentCheckbox() {
+    return Semantics(
+      label: 'Consent to sharing your details with a solar consultant or '
+          'installer, required to submit',
+      child: InkWell(
+        onTap: widget.isLoading
+            ? null
+            : () => setState(() => _consentGiven = !_consentGiven),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Checkbox(
+                value: _consentGiven,
+                onChanged: widget.isLoading
+                    ? null
+                    : (bool? value) =>
+                        setState(() => _consentGiven = value ?? false),
+                activeColor: AppColors.primary,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: RichText(
+                    text: TextSpan(
+                      style: AppTypography.caption,
+                      children: [
+                        const TextSpan(
+                          text: 'I consent to my information being collected '
+                              'and shared with a solar consultant or installer '
+                              'so they can follow up on my quote or booking. I '
+                              'can withdraw this consent at any time. ',
+                        ),
+                        TextSpan(
+                          text: 'Privacy Policy',
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = widget.onPrivacyPolicyTap,
+                        ),
+                        const TextSpan(text: '.'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _marketingCheckbox() {
+    return Semantics(
+      label: 'Optional: opt in to marketing emails and SMS updates',
+      child: InkWell(
+        onTap: widget.isLoading
+            ? null
+            : () => setState(() => _marketingOptIn = !_marketingOptIn),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Checkbox(
+                value: _marketingOptIn,
+                onChanged: widget.isLoading
+                    ? null
+                    : (bool? value) =>
+                        setState(() => _marketingOptIn = value ?? false),
+                activeColor: AppColors.primary,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    '(Optional) Send me occasional email/SMS updates about '
+                    'offers and news. I can unsubscribe at any time.',
+                    style: AppTypography.caption,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

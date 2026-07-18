@@ -1,6 +1,6 @@
 // Lead Screen (/lead) — imported design Step 3.
-// Mode-aware (book | quote) lead capture → animated thank-you + "what happens
-// next". Persistence/analytics wiring is identical to the prior inline flow.
+// Book-a-call lead capture → animated thank-you + "what happens next".
+// Persistence/analytics wiring is identical to the prior inline flow.
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,9 +28,6 @@ class _LeadScreenState extends State<LeadScreen> {
   String? _apiError;
   bool _leadSent = false;
   String _leadName = 'there';
-
-  bool get _isBook =>
-      context.read<FunnelController>().leadMode == 'book';
 
   Future<void> _handleSubmit(LeadFormData formData) async {
     setState(() {
@@ -67,6 +64,7 @@ class _LeadScreenState extends State<LeadScreen> {
       paybackYears: priced?.paybackYears,
       timestamp: DateTime.now().toIso8601String(),
       company: '',
+      marketingOptIn: formData.marketingOptIn,
     );
 
     try {
@@ -100,7 +98,6 @@ class _LeadScreenState extends State<LeadScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool book = _isBook;
     return Scaffold(
       backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: true,
@@ -117,12 +114,12 @@ class _LeadScreenState extends State<LeadScreen> {
                   children: [
                     const AppHeader(),
                     const SizedBox(height: 8),
-                    StepProgressIndicator(
+                    const StepProgressIndicator(
                       currentStep: 3,
-                      stepName: book ? 'Book a call' : 'Tailored quote',
+                      stepName: 'Book a call',
                     ),
                     const SizedBox(height: 18),
-                    if (_leadSent) _confirmation(book) else _formView(book),
+                    if (_leadSent) _confirmation() else _formView(),
                   ],
                 ),
               ),
@@ -133,24 +130,28 @@ class _LeadScreenState extends State<LeadScreen> {
     );
   }
 
-  Widget _formView(bool book) {
+  Widget _formView() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          book ? 'Book your free phone consultation' : 'Get your tailored quote',
+          'Book your free phone consultation',
           style: AppTypography.h1,
         ),
         const SizedBox(height: 6),
         Text(
-          book
-              ? 'A local specialist confirms your roof, usage and options over the '
-                  'phone, then finalises your exact price.'
-              : "Tell us where you are and we'll send a precise, itemised quote "
-                  'built for your home.',
+          'A local specialist confirms your roof, usage and options over the '
+          'phone, then finalises your exact price.',
           style: AppTypography.body.copyWith(color: AppColors.textSecondary),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+        Text(
+          "We'll share the details below with a solar consultant so they can "
+          'follow up on your quote or booking. See our Privacy Policy for '
+          'how your information is handled.',
+          style: AppTypography.caption,
+        ),
+        const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -163,8 +164,8 @@ class _LeadScreenState extends State<LeadScreen> {
             onSubmit: _handleSubmit,
             isLoading: _isLoading,
             apiError: _apiError,
-            submitLabel:
-                book ? 'Request my call' : 'Send my tailored quote',
+            submitLabel: 'Request my call',
+            onPrivacyPolicyTap: () => context.push('/privacy-policy'),
           ),
         ),
         const SizedBox(height: 15),
@@ -176,8 +177,7 @@ class _LeadScreenState extends State<LeadScreen> {
             const SizedBox(width: 7),
             Flexible(
               child: Text(
-                'Your details are kept private, used only for your quote, and '
-                'never sold to third parties.',
+                'Your details are kept secure and only used as described above.',
                 textAlign: TextAlign.center,
                 style: AppTypography.caption,
               ),
@@ -190,23 +190,14 @@ class _LeadScreenState extends State<LeadScreen> {
     );
   }
 
-  Widget _confirmation(bool book) {
-    final String msg = book
-        ? 'Your request is in. A local specialist will call within one business '
-            'day to lock in a time that suits you.'
-        : 'Your tailored quote is on its way. A specialist will email your '
-            'itemised proposal within one business day.';
-    final List<String> steps = book
-        ? [
-            'We call to confirm a time that suits you.',
-            'A specialist talks through your roof, usage and options by phone.',
-            'You get a clear, tailored recommendation — no obligation.',
-          ]
-        : [
-            'We review your home details and usage pattern.',
-            'A specialist prepares your itemised proposal.',
-            'You receive your tailored quote by email — no obligation.',
-          ];
+  Widget _confirmation() {
+    const String msg = 'Your request is in. A local specialist will call '
+        'within one business day to lock in a time that suits you.';
+    const List<String> steps = [
+      'We call to confirm a time that suits you.',
+      'A specialist talks through your roof, usage and options by phone.',
+      'You get a clear, tailored recommendation — no obligation.',
+    ];
 
     return Column(
       children: [

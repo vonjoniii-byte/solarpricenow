@@ -178,6 +178,7 @@ void main() {
         expect(json.containsKey('payback_years'), isTrue);
         expect(json.containsKey('timestamp'), isTrue);
         expect(json.containsKey('company'), isTrue);
+        expect(json.containsKey('marketing_opt_in'), isTrue);
 
         // Verify values
         expect(json['name'], equals('Jane Smith'));
@@ -194,6 +195,26 @@ void main() {
         expect(json['payback_years'], equals(5.7));
         expect(json['timestamp'], equals('2026-06-10T08:00:00.000Z'));
         expect(json['company'], equals(''));
+        expect(json['marketing_opt_in'], isFalse); // default when unspecified
+      });
+
+      test('marketing_opt_in serializes true when set', () {
+        final lead = LeadModel(
+          name: 'Jane Smith',
+          email: 'jane@example.com',
+          phone: '0412345678',
+          postcode: '2000',
+          bill2month: 450,
+          setup: SetupType.nothing,
+          pattern: UsagePattern.mostlyDay,
+          recommendedArray: '12.35kW',
+          recommendedBattery: '13.5kWh battery',
+          timestamp: '2026-06-10T08:00:00.000Z',
+          marketingOptIn: true,
+        );
+
+        final json = lead.toJson();
+        expect(json['marketing_opt_in'], isTrue);
       });
 
       test('null values are serialized as null', () {

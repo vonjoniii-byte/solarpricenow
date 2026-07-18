@@ -8,6 +8,7 @@ import 'screens/step1_input_screen.dart';
 import 'screens/calculating_screen.dart';
 import 'screens/results_screen.dart';
 import 'screens/lead_screen.dart';
+import 'screens/privacy_policy_screen.dart';
 import 'theme/app_theme.dart';
 
 class SolarCalculatorApp extends StatefulWidget {
@@ -68,6 +69,14 @@ class _SolarCalculatorAppState extends State<SolarCalculatorApp> {
           pageBuilder: (context, state) => _buildPage(
             state,
             const LeadScreen(),
+            forward: true,
+          ),
+        ),
+        GoRoute(
+          path: '/privacy-policy',
+          pageBuilder: (context, state) => _buildPage(
+            state,
+            const PrivacyPolicyScreen(),
             forward: true,
           ),
         ),

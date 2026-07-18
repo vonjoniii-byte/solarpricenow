@@ -19,6 +19,8 @@ class LeadModel {
   final String timestamp;
   // Honeypot — must be empty string on legitimate submissions
   final String company;
+  // Consent — form gates submission on this being true, recorded for compliance.
+  final bool marketingOptIn;
 
   const LeadModel({
     required this.name,
@@ -35,6 +37,7 @@ class LeadModel {
     this.paybackYears,
     required this.timestamp,
     this.company = '',
+    this.marketingOptIn = false,
   });
 
   /// Converts to JSON using snake_case keys per ARCHITECTURE.md §5.
@@ -54,6 +57,7 @@ class LeadModel {
       'payback_years': paybackYears,
       'timestamp': timestamp,
       'company': company,
+      'marketing_opt_in': marketingOptIn,
     };
   }
 

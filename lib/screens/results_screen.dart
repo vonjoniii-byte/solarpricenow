@@ -1,7 +1,7 @@
 // Results Screen (/result) — imported design Step 2 (ungated).
 // Shows the full recommendation INCLUDING real price/savings/payback with no
-// personal details. Lead capture is secondary: "Book a free phone consultation"
-// (book mode) or "Email me this estimate" (quote mode) → /lead.
+// personal details. Lead capture is secondary: "Book a free phone
+// consultation" → /lead.
 // Variant A = priced; Variant B = consult (real engine behaviour the design omits).
 
 import 'package:flutter/material.dart';
@@ -38,14 +38,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
     });
   }
 
-  void _goLead(String mode) {
-    final controller = context.read<FunnelController>();
-    controller.setLeadMode(mode);
-    if (mode == 'book') {
-      Analytics.trackCtaClick();
-    } else {
-      Analytics.trackLeadFormRevealed();
-    }
+  void _goLead() {
+    Analytics.trackCtaClick();
     context.push('/lead');
   }
 
@@ -453,17 +447,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   }
 
   Widget _ctas() {
-    return Column(
-      children: [
-        BookAssessmentCta(onTap: () => _goLead('book')),
-        const SizedBox(height: 10),
-        SecondaryCta(
-          onTap: () => _goLead('quote'),
-          label: 'Email me this estimate',
-          icon: Icons.mail_outline_rounded,
-        ),
-      ],
-    );
+    return BookAssessmentCta(onTap: _goLead);
   }
 
   Widget _privacyLine(String text) {

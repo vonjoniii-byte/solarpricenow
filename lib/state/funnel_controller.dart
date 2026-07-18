@@ -14,14 +14,6 @@ class FunnelController extends ChangeNotifier {
   RecommendationResult? recommendation;
   PricedResult? pricedResult;
 
-  /// Which secondary CTA the user took into the lead step: 'book' or 'quote'.
-  String leadMode = 'book';
-
-  void setLeadMode(String mode) {
-    leadMode = mode;
-    notifyListeners();
-  }
-
   // ---------------------------------------------------------------------------
   // Step 1 — set inputs
   // ---------------------------------------------------------------------------

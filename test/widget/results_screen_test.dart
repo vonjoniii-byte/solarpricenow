@@ -29,7 +29,7 @@ Widget _harness(FunnelController controller) {
 
 void main() {
   group('Redesigned results', () {
-    testWidgets('priced result shows figures, % off chip, caveat, dual CTA, no form',
+    testWidgets('priced result shows figures, % off chip, caveat, CTA, no form',
         (tester) async {
       // bill=500, nothing, evenSplit → 9.9kW + 14.4kWh → priced $15,504.
       final c = _seeded(
@@ -62,9 +62,9 @@ void main() {
       // Estimate caveat present with figures.
       expect(find.textContaining('Estimate only'), findsOneWidget);
 
-      // Both secondary CTAs, no personal-details fields on this screen.
+      // Booking CTA present, no personal-details fields on this screen.
       expect(find.text('Book a free phone consultation'), findsOneWidget);
-      expect(find.text('Email me this estimate'), findsOneWidget);
+      expect(find.text('Email me this estimate'), findsNothing);
       expect(find.byType(TextFormField), findsNothing);
     });
 
