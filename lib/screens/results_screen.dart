@@ -246,7 +246,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
           SizedBox(
             height: 130,
             width: double.infinity,
-            child: HouseIllustration(hasSolar: true, hasBattery: hasBattery),
+            child: HouseIllustration(
+              hasSolar: true,
+              hasBattery: hasBattery,
+              backgroundColor: AppColors.surface,
+            ),
           ),
           const SizedBox(height: 18),
           Text(

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /// Simple front-on line-art house illustration used on the results card.
@@ -16,8 +17,11 @@ class HouseIllustration extends StatelessWidget {
     this.hasBattery = false,
     this.lineColor = const Color(0xFF1E293B),
     this.panelStrokeColor = const Color(0xFF2563EB),
-    this.panelFillColor = const Color(0xFF60A5FA),
+    this.panelFillColor = const Color(0xFF4C8FF0),
     this.batteryColor = const Color(0xFF4CAF50),
+    // Should match the surface the illustration sits on (e.g. AppColors.surface)
+    // so the bush "blob" blends in rather than showing a mismatched box.
+    this.backgroundColor = Colors.white,
   });
 
   final bool hasSolar;
@@ -26,6 +30,7 @@ class HouseIllustration extends StatelessWidget {
   final Color panelStrokeColor;
   final Color panelFillColor;
   final Color batteryColor;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +43,7 @@ class HouseIllustration extends StatelessWidget {
         panelStrokeColor: panelStrokeColor,
         panelFillColor: panelFillColor,
         batteryColor: batteryColor,
+        backgroundColor: backgroundColor,
       ),
     );
   }
@@ -51,6 +57,7 @@ class _HousePainter extends CustomPainter {
     required this.panelStrokeColor,
     required this.panelFillColor,
     required this.batteryColor,
+    required this.backgroundColor,
   });
 
   final bool hasSolar;
@@ -59,6 +66,7 @@ class _HousePainter extends CustomPainter {
   final Color panelStrokeColor;
   final Color panelFillColor;
   final Color batteryColor;
+  final Color backgroundColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -77,30 +85,29 @@ class _HousePainter extends CustomPainter {
     final double wallTopY = h * 0.5;
     final double roofPeakY = h * 0.14;
     final double bodyLeft = w * 0.06;
-    final double bodyRight = w * 0.66;
+    final double bodyRight = w * 0.62;
     final double eaveOverhang = w * 0.03;
-    final double roofPeakX = w * 0.36;
-    final double hipX = w * 0.15;
+    final double roofPeakX = w * 0.34;
+    final double hipX = w * 0.14;
+    final Offset roofPeak = Offset(roofPeakX, roofPeakY);
+    final Offset eaveRight = Offset(bodyRight + eaveOverhang, wallTopY);
 
     // ── Roof (hipped, two ridge lines for depth) ───────────────────────
-    canvas.drawLine(Offset(bodyLeft - eaveOverhang, wallTopY),
-        Offset(roofPeakX, roofPeakY), stroke);
-    canvas.drawLine(Offset(roofPeakX, roofPeakY),
-        Offset(bodyRight + eaveOverhang, wallTopY), stroke);
     canvas.drawLine(
-        Offset(roofPeakX, roofPeakY), Offset(hipX, wallTopY), stroke);
+        Offset(bodyLeft - eaveOverhang, wallTopY), roofPeak, stroke);
+    canvas.drawLine(roofPeak, eaveRight, stroke);
+    canvas.drawLine(roofPeak, Offset(hipX, wallTopY), stroke);
 
     // ── Walls + eave line + ground line ────────────────────────────────
-    canvas.drawLine(
-        Offset(bodyLeft - eaveOverhang, wallTopY),
-        Offset(bodyRight + eaveOverhang, wallTopY),
+    canvas.drawLine(Offset(bodyLeft - eaveOverhang, wallTopY), eaveRight,
         stroke);
     canvas.drawLine(
         Offset(bodyLeft, wallTopY), Offset(bodyLeft, groundY), stroke);
     canvas.drawLine(
         Offset(bodyRight, wallTopY), Offset(bodyRight, groundY), stroke);
-    canvas.drawLine(Offset(bodyLeft, groundY),
-        Offset(bodyRight + w * 0.10, groundY), stroke);
+    final double groundRightX = bodyRight + w * 0.20;
+    canvas.drawLine(
+        Offset(bodyLeft, groundY), Offset(groundRightX, groundY), stroke);
 
     // ── Garage door (louvered) ──────────────────────────────────────────
     final double garageLeft = bodyLeft + w * 0.02;
@@ -121,106 +128,3 @@ class _HousePainter extends CustomPainter {
         Rect.fromLTRB(doorLeft, wallTopY + h * 0.06, doorRight, groundY);
     canvas.drawRect(doorRect, stroke);
     final Paint dot = Paint()..color = lineColor;
-    canvas.drawCircle(
-        Offset(doorRect.right - 3, doorRect.top + doorRect.height * 0.5),
-        1.6,
-        dot);
-
-    // ── Windows ──────────────────────────────────────────────────────────
-    final double winLeft = doorRight + w * 0.03;
-    final double winRight = winLeft + w * 0.14;
-    final Rect winRect = Rect.fromLTRB(
-        winLeft, wallTopY + h * 0.08, winRight, wallTopY + h * 0.28);
-    canvas.drawRect(winRect, stroke);
-    canvas.drawLine(
-        Offset((winRect.left + winRect.right) / 2, winRect.top),
-        Offset((winRect.left + winRect.right) / 2, winRect.bottom),
-        stroke);
-    canvas.drawLine(
-        Offset(winRect.left, (winRect.top + winRect.bottom) / 2),
-        Offset(winRect.right, (winRect.top + winRect.bottom) / 2),
-        stroke);
-
-    // ── Bushes ───────────────────────────────────────────────────────────
-    final Paint bushStroke = Paint()
-      ..color = lineColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6;
-    final double bushBaseX = bodyRight + w * 0.02;
-    final List<Offset> bushCenters = <Offset>[
-      Offset(bushBaseX, groundY - h * 0.05),
-      Offset(bushBaseX + w * 0.035, groundY - h * 0.07),
-      Offset(bushBaseX + w * 0.07, groundY - h * 0.04),
-    ];
-    for (final Offset c in bushCenters) {
-      canvas.drawCircle(c, w * 0.03, bushStroke);
-    }
-
-    // ── Solar panels (angled array on the right roof slope) ───────────────
-    if (hasSolar) {
-      final Paint panelFill = Paint()
-        ..color = panelFillColor.withValues(alpha: 0.85);
-      final Paint panelStroke = Paint()
-        ..color = panelStrokeColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.4;
-
-      const int cols = 4;
-      const int rows = 2;
-      final double arrayWidth = w * 0.30;
-      final double arrayHeight = h * 0.11;
-      final double originX = w * 0.34;
-      final double originY = wallTopY - h * 0.16;
-      final double cellW = arrayWidth / cols;
-      final double cellH = arrayHeight / rows;
-
-      canvas.save();
-      canvas.translate(originX, originY);
-      canvas.rotate(-0.12);
-      for (int r = 0; r < rows; r++) {
-        for (int c = 0; c < cols; c++) {
-          final Rect cell = Rect.fromLTWH(
-              c * cellW, r * cellH, cellW - 1.5, cellH - 1.5);
-          canvas.drawRect(cell, panelFill);
-          canvas.drawRect(cell, panelStroke);
-        }
-      }
-      canvas.restore();
-    }
-
-    // ── Battery (standing box beside the house) ────────────────────────────
-    if (hasBattery) {
-      final Paint batteryFill = Paint()..color = batteryColor;
-      final double bLeft = bodyRight + w * 0.13;
-      final double bTop = groundY - h * 0.22;
-      final Rect batteryRect =
-          Rect.fromLTRB(bLeft, bTop, bLeft + w * 0.05, groundY);
-      final RRect rrect =
-          RRect.fromRectAndRadius(batteryRect, const Radius.circular(3));
-      canvas.drawRRect(rrect, batteryFill);
-      canvas.drawRRect(rrect, stroke);
-
-      final Paint ventPaint = Paint()
-        ..color = Colors.white.withValues(alpha: 0.85)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.4;
-      canvas.drawLine(
-        Offset(batteryRect.left + 3,
-            batteryRect.top + batteryRect.height * 0.35),
-        Offset(batteryRect.right - 3,
-            batteryRect.top + batteryRect.height * 0.35),
-        ventPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _HousePainter oldDelegate) {
-    return oldDelegate.hasSolar != hasSolar ||
-        oldDelegate.hasBattery != hasBattery ||
-        oldDelegate.lineColor != lineColor ||
-        oldDelegate.panelStrokeColor != panelStrokeColor ||
-        oldDelegate.panelFillColor != panelFillColor ||
-        oldDelegate.batteryColor != batteryColor;
-  }
-}
