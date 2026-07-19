@@ -21,6 +21,7 @@ import '../widgets/book_assessment_cta.dart';
 import '../widgets/caveat_note.dart';
 import '../widgets/app_header.dart';
 import '../widgets/trust_section.dart';
+import '../widgets/house_illustration.dart';
 
 class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
@@ -89,21 +90,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
       children: [
         _livePill(),
         const SizedBox(height: 14),
-        _hero(
-          controller.systemLabel,
-          chips: [
-            if (reduction != null)
-              _heroChip(Icons.trending_down_rounded, 'Est. $reduction% off your bill'),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (priced != null) ...[
-          _metrics(priced),
+        _recommendedCard(controller, priced, reduction),
+        const SizedBox(height: 12),
+        if (priced != null && !priced.isStub && priced.price > 0) ...[
+          _financeCaveat(),
           const SizedBox(height: 12),
-          if (!priced.isStub && priced.price > 0) ...[
-            _financeCaveat(),
-            const SizedBox(height: 12),
-          ],
         ],
         const CaveatNote(),
         const SizedBox(height: 20),
@@ -180,6 +171,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
+  // Still used by the consult (Variant B) headline.
   Widget _hero(String label, {required List<Widget> chips}) {
     return Container(
       width: double.infinity,
@@ -219,210 +211,160 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  Widget _heroChip(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 17, color: AppColors.primaryLight),
-          const SizedBox(width: 7),
-          Flexible(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontFamily: AppTypography.fontFamily,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textOnPrimary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // ── New recommended-system card (matches reference design) ─────────────────
+  Widget _recommendedCard(
+      FunnelController controller, PricedResult? priced, int? reduction) {
+    final bool hasBattery =
+        controller.systemLabel.toLowerCase().contains('battery');
+    final FinanceResult? finance =
+        (priced != null && !priced.isStub && priced.price > 0)
+            ? FinanceCalculator.compute(priced.price)
+            : null;
 
-  Widget _metrics(PricedResult priced) {
-    final cards = <Widget>[
-      _metricCard(Icons.savings_rounded, 'Estimated investment',
-          _money(priced.price), 'after rebates',
-          badge: priced.isStub ? const PriceStubBadge() : null),
-      _comboCard(priced),
-      _metricCard(Icons.event_repeat_rounded, 'Payback period',
-          '${priced.paybackYears.toStringAsFixed(1)} yrs', 'to break even'),
-      _financeCard(priced),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const double gap = AppSpacing.metricCardGap;
-        final bool twoCol = constraints.maxWidth >= Breakpoints.compact;
-        // Each card is given a fixed width (single column < 360px, else 2-up),
-        // so the cards' internal flex children always have a bounded width.
-        final double cardWidth =
-            twoCol ? (constraints.maxWidth - gap) / 2 : constraints.maxWidth;
-        return Wrap(
-          spacing: gap,
-          runSpacing: gap,
-          children: [
-            for (final card in cards) SizedBox(width: cardWidth, child: card),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _metricCard(IconData icon, String label, String value, String sub,
-      {bool highlight = false, Widget? badge}) {
     return Container(
       width: double.infinity,
-      height: AppSpacing.metricCardHeight,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(radiusCard),
         border: Border.all(color: AppColors.borderDefault),
-        boxShadow: shadowCard,
+        boxShadow: shadowCardElevated,
       ),
-      padding: const EdgeInsets.all(AppSpacing.metricCardPadding),
+      padding: const EdgeInsets.fromLTRB(22, 26, 22, 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 19, color: AppColors.textSecondary),
-              const SizedBox(width: 7),
-              Expanded(
-                child: Text(
-                  label,
-                  style: AppTypography.caption.copyWith(
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 11),
           Text(
-            value,
-            style: AppTypography.metricValue.copyWith(
-              color: highlight ? AppColors.secondary : AppColors.textPrimary,
+            'Your recommended system',
+            textAlign: TextAlign.center,
+            style: AppTypography.h1.copyWith(
+              fontSize: 19,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 3),
-          Text(sub, style: AppTypography.caption.copyWith(color: AppColors.textMuted)),
-          if (badge != null) ...[const SizedBox(height: 6), badge],
+          const SizedBox(height: 18),
+          SizedBox(
+            height: 130,
+            width: double.infinity,
+            child: HouseIllustration(hasSolar: true, hasBattery: hasBattery),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            controller.systemLabel,
+            textAlign: TextAlign.center,
+            style: AppTypography.h1.copyWith(fontSize: 27),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Best match for your usage',
+            textAlign: TextAlign.center,
+            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 18),
+          Divider(height: 1, color: AppColors.line),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              'Proudly installed by a trusted WA solar company',
+              textAlign: TextAlign.center,
+              style: AppTypography.caption.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Divider(height: 1, color: AppColors.line),
+          if (priced != null) ...[
+            const SizedBox(height: 4),
+            _metricsBlock(priced, reduction, finance),
+          ],
         ],
       ),
     );
   }
 
-  /// Shared card shell (same styling as _metricCard) for the multi-figure cards.
-  Widget _cardShell(List<Widget> children) {
-    return Container(
-      width: double.infinity,
-      height: AppSpacing.metricCardHeight,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(radiusCard),
-        border: Border.all(color: AppColors.borderDefault),
-        boxShadow: shadowCard,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.metricCardPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: children,
-      ),
-    );
-  }
-
-  Widget _cardLabel(IconData icon, String label) {
-    return Row(
+  Widget _metricsBlock(
+      PricedResult priced, int? reduction, FinanceResult? finance) {
+    return Column(
       children: [
-        Icon(icon, size: 19, color: AppColors.textSecondary),
-        const SizedBox(width: 7),
-        Expanded(
-          child: Text(
-            label,
-            style: AppTypography.caption
-                .copyWith(fontWeight: FontWeight.w600, height: 1.2),
+        _metricRow(
+          icon: Icons.savings_rounded,
+          label: 'Investment',
+          value: _money(priced.price),
+          trailingBadge: priced.isStub ? const PriceStubBadge() : null,
+        ),
+        _rowDivider(),
+        _metricRow(
+          icon: Icons.trending_up_rounded,
+          label: 'Annual savings',
+          value: _money(priced.annualSaving),
+        ),
+        _rowDivider(),
+        _metricRow(
+          icon: Icons.event_repeat_rounded,
+          label: 'Payback',
+          value: '${priced.paybackYears.toStringAsFixed(1)} years',
+        ),
+        if (reduction != null) ...[
+          _rowDivider(),
+          _metricRow(
+            icon: Icons.trending_down_rounded,
+            label: 'Bill reduction',
+            value: '$reduction%',
           ),
+        ],
+        _rowDivider(),
+        _metricRow(
+          icon: Icons.credit_card_rounded,
+          label: 'Finance option',
+          value: finance != null
+              ? 'From ${_money(finance.bimonthlyRepayment)} / 2mo'
+              : 'Available on quote',
         ),
       ],
     );
   }
 
-  // Combined "Annual savings" + "Estimated bill after" card (both labelled).
-  Widget _comboCard(PricedResult priced) {
-    return _cardShell([
-      _cardLabel(Icons.trending_up_rounded, 'Annual savings'),
-      const SizedBox(height: 8),
-      Text(
-        '${_money(priced.annualSaving)} / yr',
-        style: AppTypography.metricValue.copyWith(color: AppColors.secondary),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+  Widget _metricRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    Widget? trailingBadge,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, size: 18, color: AppColors.textSecondary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                value,
+                style: AppTypography.bodySemibold.copyWith(fontSize: 17),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (trailingBadge != null) ...[
+                const SizedBox(height: 4),
+                trailingBadge,
+              ],
+            ],
+          ),
+        ],
       ),
-      const SizedBox(height: 10),
-      Divider(height: 1, color: AppColors.line),
-      const SizedBox(height: 8),
-      Text(
-        'BILL AFTER',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppTypography.captionUppercase
-            .copyWith(color: AppColors.textSecondary, letterSpacing: 0.8),
-      ),
-      const SizedBox(height: 3),
-      Text(
-        '${_money(priced.estBillAfter2mo)} / 2 months',
-        style: AppTypography.bodySemibold.copyWith(fontSize: 16),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-    ]);
+    );
   }
 
-  // Financing card — indicative bi-monthly repayment, or "Available on quote".
-  Widget _financeCard(PricedResult priced) {
-    final FinanceResult? f =
-        priced.isStub ? null : FinanceCalculator.compute(priced.price);
-    if (f == null) {
-      return _cardShell([
-        _cardLabel(Icons.account_balance_rounded, 'Finance from'),
-        const SizedBox(height: 11),
-        Text('Available on quote',
-            style: AppTypography.bodySemibold.copyWith(fontSize: 16)),
-        const SizedBox(height: 3),
-        Text('indicative repayment',
-            style: AppTypography.caption.copyWith(color: AppColors.textMuted)),
-      ]);
-    }
-    return _cardShell([
-      _cardLabel(Icons.account_balance_rounded, 'Finance from'),
-      const SizedBox(height: 11),
-      Text(
-        _money(f.bimonthlyRepayment),
-        style: AppTypography.metricValue.copyWith(color: AppColors.primary),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      const SizedBox(height: 3),
-      Text('/ 2 months',
-          style: AppTypography.caption.copyWith(color: AppColors.textMuted)),
-    ]);
-  }
+  Widget _rowDivider() => Divider(height: 1, color: AppColors.line);
 
   // Finance terms caveat — shown only when a repayment figure is displayed.
   Widget _financeCaveat() {
@@ -435,7 +377,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         Expanded(
           child: Text(
             'Indicative only, based on the Brighte HEUF Discounted Green Loan '
-            '(7.99% p.a. fixed, comparison rate 9.49% p.a., 10-year term, \$199 '
+            '(7.99% p.a. fixed, comparison rate 9.49% p.a., 10-year term, \$399 '
             'establishment fee, \$2.70/week account-keeping fee). Subject to '
             "credit approval; T&Cs apply. Confirm exact repayments via Brighte's "
             'calculator.',
