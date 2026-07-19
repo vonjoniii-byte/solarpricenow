@@ -128,3 +128,140 @@ class _HousePainter extends CustomPainter {
         Rect.fromLTRB(doorLeft, wallTopY + h * 0.06, doorRight, groundY);
     canvas.drawRect(doorRect, stroke);
     final Paint dot = Paint()..color = lineColor;
+    canvas.drawCircle(
+        Offset(doorRect.right - 3, doorRect.top + doorRect.height * 0.5),
+        1.6,
+        dot);
+
+    // ── Windows ──────────────────────────────────────────────────────────
+    final double winLeft = doorRight + w * 0.03;
+    final double winRight = winLeft + w * 0.16;
+    final Rect winRect = Rect.fromLTRB(
+        winLeft, wallTopY + h * 0.08, winRight, wallTopY + h * 0.28);
+    canvas.drawRect(winRect, stroke);
+    canvas.drawLine(
+        Offset((winRect.left + winRect.right) / 2, winRect.top),
+        Offset((winRect.left + winRect.right) / 2, winRect.bottom),
+        stroke);
+    canvas.drawLine(
+        Offset(winRect.left, (winRect.top + winRect.bottom) / 2),
+        Offset(winRect.right, (winRect.top + winRect.bottom) / 2),
+        stroke);
+
+    // ── Solar panels — aligned to the actual right-roof-slope angle ───────
+    if (hasSolar) {
+      final double dx = eaveRight.dx - roofPeak.dx;
+      final double dy = eaveRight.dy - roofPeak.dy;
+      final double slopeLen = math.sqrt(dx * dx + dy * dy);
+      final double angle = math.atan2(dy, dx);
+
+      const int cols = 4;
+      const int rows = 2;
+      final double insetStart = slopeLen * 0.16;
+      final double arrayLen = slopeLen * 0.62;
+      final double arrayThickness = h * 0.10;
+      final double cellW = arrayLen / cols;
+      final double cellH = arrayThickness / rows;
+      const double gap = 1.6;
+
+      final Paint panelFill = Paint()..color = panelFillColor;
+      final Paint panelStroke = Paint()
+        ..color = panelStrokeColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2;
+      final Paint frameStroke = Paint()
+        ..color = panelStrokeColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8;
+
+      canvas.save();
+      canvas.translate(roofPeak.dx, roofPeak.dy);
+      canvas.rotate(angle);
+      // Move along the slope by the inset, and lift up off the roofline
+      // (negative local y in this rotated frame points outward/up off the
+      // roof surface) so the array sits visibly on top of the roof.
+      canvas.translate(insetStart, -arrayThickness - h * 0.012);
+
+      for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+          final Rect cell = Rect.fromLTWH(
+            c * cellW + gap / 2,
+            r * cellH + gap / 2,
+            cellW - gap,
+            cellH - gap,
+          );
+          canvas.drawRect(cell, panelFill);
+          canvas.drawRect(cell, panelStroke);
+        }
+      }
+      // Outer frame ties the grid together into one clean panel bank.
+      canvas.drawRect(
+          Rect.fromLTWH(0, 0, arrayLen, arrayThickness), frameStroke);
+      canvas.restore();
+    }
+
+    // ── Bush — single filled "blob" made from unioned circles ─────────────
+    final double bushCenterX = bodyRight + w * 0.045;
+    final double bushBaseY = groundY - h * 0.03;
+    final List<MapEntry<Offset, double>> lobes = <MapEntry<Offset, double>>[
+      MapEntry(
+          Offset(bushCenterX - w * 0.028, bushBaseY - h * 0.015), w * 0.030),
+      MapEntry(Offset(bushCenterX, bushBaseY - h * 0.048), w * 0.037),
+      MapEntry(
+          Offset(bushCenterX + w * 0.030, bushBaseY - h * 0.012), w * 0.028),
+    ];
+    Path bushPath = Path();
+    for (final MapEntry<Offset, double> lobe in lobes) {
+      bushPath = Path.combine(
+        PathOperation.union,
+        bushPath,
+        Path()..addOval(Rect.fromCircle(center: lobe.key, radius: lobe.value)),
+      );
+    }
+    final Paint bushFill = Paint()..color = backgroundColor;
+    final Paint bushStroke = Paint()
+      ..color = lineColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(bushPath, bushFill);
+    canvas.drawPath(bushPath, bushStroke);
+
+    // ── Battery — standing right against the house wall, beside the bush ──
+    if (hasBattery) {
+      final double batteryLeft = bushCenterX + w * 0.075;
+      final double batteryWidth = w * 0.042;
+      final double bTop = groundY - h * 0.20;
+      final Rect batteryRect =
+          Rect.fromLTRB(batteryLeft, bTop, batteryLeft + batteryWidth, groundY);
+      final RRect rrect =
+          RRect.fromRectAndRadius(batteryRect, const Radius.circular(3));
+      final Paint batteryFill = Paint()..color = batteryColor;
+      canvas.drawRRect(rrect, batteryFill);
+      canvas.drawRRect(rrect, stroke);
+
+      final Paint ventPaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.9)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4;
+      canvas.drawLine(
+        Offset(batteryRect.left + 3,
+            batteryRect.top + batteryRect.height * 0.35),
+        Offset(batteryRect.right - 3,
+            batteryRect.top + batteryRect.height * 0.35),
+        ventPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HousePainter oldDelegate) {
+    return oldDelegate.hasSolar != hasSolar ||
+        oldDelegate.hasBattery != hasBattery ||
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.panelStrokeColor != panelStrokeColor ||
+        oldDelegate.panelFillColor != panelFillColor ||
+        oldDelegate.batteryColor != batteryColor ||
+        oldDelegate.backgroundColor != backgroundColor;
+  }
+}
