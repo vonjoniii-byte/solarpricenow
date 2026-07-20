@@ -325,40 +325,34 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 )
               : const SizedBox(width: double.infinity),
         ),
-        if (reduction != null) ...[
-          _rowDivider(),
-          InkWell(
-            onTap: () => setState(() => _billReductionDetailsRevealed =
-                !_billReductionDetailsRevealed),
-            child: _metricRow(
-              icon: Icons.trending_down_rounded,
-              label: 'Bill reduction',
-              value: '$reduction%',
-              trailingBadge: Icon(
-                _billReductionDetailsRevealed
-                    ? Icons.expand_less_rounded
-                    : Icons.expand_more_rounded,
-                size: 16,
-                color: AppColors.textMuted,
-              ),
+        _rowDivider(),
+        InkWell(
+          onTap: () => setState(() => _billReductionDetailsRevealed =
+              !_billReductionDetailsRevealed),
+          child: _metricRow(
+            icon: Icons.trending_up_rounded,
+            label: 'Annual Savings',
+            value: reduction != null
+                ? '${_money(priced.annualSaving)} ($reduction%)'
+                : _money(priced.annualSaving),
+            trailingBadge: Icon(
+              _billReductionDetailsRevealed
+                  ? Icons.expand_less_rounded
+                  : Icons.expand_more_rounded,
+              size: 16,
+              color: AppColors.textMuted,
             ),
           ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            alignment: Alignment.topCenter,
-            child: _billReductionDetailsRevealed
-                ? Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: _billReductionDetail(billBefore, priced),
-                  )
-                : const SizedBox(width: double.infinity),
-          ),
-        ],
-        _rowDivider(),
-        _metricRow(
-          icon: Icons.trending_up_rounded,
-          label: 'Annual savings',
-          value: _money(priced.annualSaving),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          alignment: Alignment.topCenter,
+          child: _billReductionDetailsRevealed
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _billReductionDetail(billBefore, priced),
+                )
+              : const SizedBox(width: double.infinity),
         ),
         _rowDivider(),
         _metricRow(
