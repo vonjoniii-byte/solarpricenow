@@ -31,6 +31,9 @@ class ResultsScreen extends StatefulWidget {
 }
 
 class _ResultsScreenState extends State<ResultsScreen> {
+  bool _financeDetailsRevealed = false;
+  bool _estimateDetailsRevealed = false;
+
   @override
   void initState() {
     super.initState();
@@ -92,10 +95,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
         const SizedBox(height: 14),
         _recommendedCard(controller, priced, reduction),
         const SizedBox(height: 12),
-        if (priced != null && !priced.isStub && priced.price > 0) ...[
-          _financeCaveat(),
-          const SizedBox(height: 12),
-        ],
         const CaveatNote(),
         const SizedBox(height: 20),
         _ctas(),
@@ -296,6 +295,22 @@ class _ResultsScreenState extends State<ResultsScreen> {
           value: _money(priced.price),
           trailingBadge: priced.isStub ? const PriceStubBadge() : null,
         ),
+        _revealToggleLink(
+          label: 'How we calculate this',
+          revealed: _estimateDetailsRevealed,
+          onTap: () =>
+              setState(() => _estimateDetailsRevealed = !_estimateDetailsRevealed),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          alignment: Alignment.topCenter,
+          child: _estimateDetailsRevealed
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _estimateCaveat(),
+                )
+              : const SizedBox(width: double.infinity),
+        ),
         _rowDivider(),
         _metricRow(
           icon: Icons.trending_up_rounded,
@@ -317,12 +332,94 @@ class _ResultsScreenState extends State<ResultsScreen> {
           ),
         ],
         _rowDivider(),
-        _metricRow(
-          icon: Icons.credit_card_rounded,
-          label: 'Finance option',
-          value: finance != null
-              ? 'From ${_money(finance.bimonthlyRepayment)} / 2mo'
-              : 'Available on quote',
+        InkWell(
+          onTap: finance != null
+              ? () => setState(
+                  () => _financeDetailsRevealed = !_financeDetailsRevealed)
+              : null,
+          child: _metricRow(
+            icon: Icons.credit_card_rounded,
+            label: 'Finance option',
+            value: finance != null
+                ? 'From ${_money(finance.bimonthlyRepayment)} / 2mo'
+                : 'Available on quote',
+            trailingBadge: finance != null
+                ? Icon(
+                    _financeDetailsRevealed
+                        ? Icons.expand_less_rounded
+                        : Icons.expand_more_rounded,
+                    size: 16,
+                    color: AppColors.textMuted,
+                  )
+                : null,
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          alignment: Alignment.topCenter,
+          child: _financeDetailsRevealed && finance != null
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: _financeCaveat(),
+                )
+              : const SizedBox(width: double.infinity),
+        ),
+      ],
+    );
+  }
+
+  // Small tappable "how we calculate this" link — generous hit area for
+  // mobile/touch (min ~44px tall including padding).
+  Widget _revealToggleLink({
+    required String label,
+    required bool revealed,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: AppTypography.caption.copyWith(
+                color: AppColors.secondary,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              revealed ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+              size: 16,
+              color: AppColors.secondary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Estimate methodology caveat — what the headline numbers assume.
+  Widget _estimateCaveat() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.info_outline_rounded,
+            size: 16, color: AppColors.textMuted),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            'This is an instant estimate based on your postcode, roof size, '
+            'and typical usage for your area — not a site inspection. Actual '
+            'pricing, savings, and payback depend on your roof\'s orientation, '
+            'shading, current electricity tariff, and final system design. A '
+            'consultant will confirm exact figures before you commit.',
+            style: AppTypography.caption.copyWith(height: 1.5),
+          ),
         ),
       ],
     );
