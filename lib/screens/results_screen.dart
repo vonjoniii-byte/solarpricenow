@@ -289,17 +289,30 @@ class _ResultsScreenState extends State<ResultsScreen> {
       PricedResult priced, int? reduction, FinanceResult? finance) {
     return Column(
       children: [
-        _metricRow(
-          icon: Icons.savings_rounded,
-          label: 'Investment',
-          value: _money(priced.price),
-          trailingBadge: priced.isStub ? const PriceStubBadge() : null,
-        ),
-        _revealToggleLink(
-          label: 'How we calculate this',
-          revealed: _estimateDetailsRevealed,
-          onTap: () =>
-              setState(() => _estimateDetailsRevealed = !_estimateDetailsRevealed),
+        InkWell(
+          onTap: () => setState(
+              () => _estimateDetailsRevealed = !_estimateDetailsRevealed),
+          child: _metricRow(
+            icon: Icons.savings_rounded,
+            label: 'Investment',
+            value: _money(priced.price),
+            trailingBadge: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (priced.isStub) ...[
+                  const PriceStubBadge(),
+                  const SizedBox(height: 4),
+                ],
+                Icon(
+                  _estimateDetailsRevealed
+                      ? Icons.expand_less_rounded
+                      : Icons.expand_more_rounded,
+                  size: 16,
+                  color: AppColors.textMuted,
+                ),
+              ],
+            ),
+          ),
         ),
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
@@ -365,41 +378,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
               : const SizedBox(width: double.infinity),
         ),
       ],
-    );
-  }
-
-  // Small tappable "how we calculate this" link — generous hit area for
-  // mobile/touch (min ~44px tall including padding).
-  Widget _revealToggleLink({
-    required String label,
-    required bool revealed,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: AppTypography.caption.copyWith(
-                color: AppColors.secondary,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              revealed ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-              size: 16,
-              color: AppColors.secondary,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
