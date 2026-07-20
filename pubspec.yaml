@@ -21,3 +21,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/house_bare.png
+    - assets/images/house_solar.png
+    - assets/images/house_solar_battery.png
+
