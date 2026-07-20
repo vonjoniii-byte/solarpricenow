@@ -125,9 +125,7 @@ class _Step1InputScreenState extends State<Step1InputScreen> {
                     ),
                     const SizedBox(height: 22),
 
-                    _primaryButton(),
-                    const SizedBox(height: 14),
-                    _trustLine(),
+                  _primaryButton(),
                   ],
                 ),
               ),
@@ -297,19 +295,4 @@ class _Step1InputScreenState extends State<Step1InputScreen> {
     );
   }
 
-  Widget _trustLine() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.lock_rounded, size: 15, color: AppColors.secondary),
-        const SizedBox(width: 6),
-        Flexible(
-          child: Text(
-            'No obligation · Your details stay private',
-            style: AppTypography.caption,
-          ),
-        ),
-      ],
-    );
-  }
 }
