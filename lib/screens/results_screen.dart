@@ -18,7 +18,7 @@ import '../theme/app_theme.dart';
 import '../theme/breakpoints.dart';
 import '../widgets/price_stub_badge.dart';
 import '../widgets/book_assessment_cta.dart';
-import '../widgets/caveat_note.dart';
+import '../widgets/caveat_note.dart' show kCaveatShort, kCaveatDetail;
 import '../widgets/app_header.dart';
 import '../widgets/trust_section.dart';
 import '../widgets/house_illustration.dart';
@@ -94,8 +94,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
         _livePill(),
         const SizedBox(height: 14),
         _recommendedCard(controller, priced, reduction),
-        const SizedBox(height: 12),
-        const CaveatNote(),
         const SizedBox(height: 20),
         _ctas(),
         const SizedBox(height: 13),
@@ -382,6 +380,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
   }
 
   // Estimate methodology caveat — what the headline numbers assume.
+  // Reuses the same copy the app already relies on elsewhere (CaveatNote),
+  // so there's one source of truth for how the estimate is described.
   Widget _estimateCaveat() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,11 +391,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            'This is an instant estimate based on your postcode, roof size, '
-            'and typical usage for your area — not a site inspection. Actual '
-            'pricing, savings, and payback depend on your roof\'s orientation, '
-            'shading, current electricity tariff, and final system design. A '
-            'consultant will confirm exact figures before you commit.',
+            '$kCaveatShort $kCaveatDetail',
             style: AppTypography.caption.copyWith(height: 1.5),
           ),
         ),
