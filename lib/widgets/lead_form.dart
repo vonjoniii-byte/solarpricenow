@@ -432,6 +432,12 @@ class LeadFormState extends State<LeadForm> {
           labelText: label,
           hintText: hint,
           floatingLabelBehavior: FloatingLabelBehavior.always,
+          floatingLabelStyle: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            height: 1.0,
+          ),
           counterText: '',
           errorStyle: const TextStyle(color: AppColors.error, fontSize: 12),
         ),
