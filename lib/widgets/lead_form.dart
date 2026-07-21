@@ -147,6 +147,7 @@ class LeadFormState extends State<LeadForm> {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         Form(
           key: _formKey,
