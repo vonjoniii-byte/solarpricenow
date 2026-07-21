@@ -103,7 +103,12 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.bg2,
         labelStyle: const TextStyle(color: AppColors.textSecondary),
-        floatingLabelStyle: const TextStyle(color: AppColors.primary),
+        floatingLabelStyle: const TextStyle(
+          color: AppColors.primary,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w600,
+          height: 1.0,
+        ),
         hintStyle: const TextStyle(color: AppColors.textMuted),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusInput),
