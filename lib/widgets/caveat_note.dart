@@ -14,9 +14,12 @@ const String kCaveatShort =
 const String kCaveatDetail =
     'Final pricing and system specifics are confirmed at a free phone '
     'consultation and may change based on your property and confirmation of '
-    'your details. Savings and payback are estimates based on your stated '
-    'electricity bill using a (bill − supply charge) × 6 model, and assume the '
-    'recommended system offsets your usage — your actual results will vary.';
+    'your details. The price shown is after state and federal rebates, '
+    'calculated using WA rebate rates in effect as of May 2026 — rebate '
+    'levels are reviewed periodically and may change. Savings and payback '
+    'are estimates based on your stated electricity bill using a '
+    '(bill − supply charge) × 6 model, and assume the recommended system '
+    'offsets your usage — your actual results will vary.';
 
 class CaveatNote extends StatefulWidget {
   const CaveatNote({super.key});
