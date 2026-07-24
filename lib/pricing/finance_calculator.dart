@@ -1,8 +1,10 @@
 // FinanceCalculator — indicative repayment for the recommended system, based on
 // the Brighte HEUF Discounted Green Loan: a FIXED-RATE AMORTISING (reducing-
 // balance) loan. Pure Dart — NO Flutter imports (isolated + unit-tested).
+// Brighte is one of several finance options we can arrange — this calculator
+// covers Brighte specifically since it's the one with published, quotable terms.
 //
-// The $199 establishment fee is financed (interest applies to it). The weekly
+// The $399 establishment fee is financed (interest applies to it). The weekly
 // account-keeping fee is added to each repayment. Repayment is presented
 // bi-monthly (every 2 months) to match the billing cycle.
 
@@ -40,7 +42,7 @@ class FinanceCalculator {
   static const int termYears = 10;
 
   /// Establishment fee, financed (added to principal).
-  static const double establishmentFee = 199.0;
+  static const double establishmentFee = 399.0;
 
   /// Weekly account-keeping fee.
   static const double weeklyFee = 2.70;

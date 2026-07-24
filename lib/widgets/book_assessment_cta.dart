@@ -17,7 +17,7 @@ class BookAssessmentCta extends StatefulWidget {
   const BookAssessmentCta({
     super.key,
     required this.onTap,
-    this.label = 'Book a free phone consultation',
+    this.label = 'Get my tailored quote',
     this.icon = Icons.event_available_rounded,
   });
 

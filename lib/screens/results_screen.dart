@@ -315,6 +315,18 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.only(left: 28, right: 4, bottom: 6),
+          child: Text(
+            'Your tailored quote could be higher or lower once we factor in '
+            'seasonal usage and other structural variables such as power '
+            'supply and roof pitch',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+        ),
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
           alignment: Alignment.topCenter,
@@ -552,11 +564,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            'Indicative only, based on the Brighte HEUF Discounted Green Loan '
-            '(7.99% p.a. fixed, comparison rate 9.49% p.a., 10-year term, \$399 '
-            'establishment fee, \$2.70/week account-keeping fee). Subject to '
-            "credit approval; T&Cs apply. Confirm exact repayments via Brighte's "
-            'calculator.',
+            'Brighte is one of several finance options available — shown here '
+            'as an indicative example. Based on the Brighte HEUF Discounted '
+            'Green Loan (7.99% p.a. fixed, comparison rate 9.49% p.a., 10-year '
+            'term, \$399 establishment fee, \$2.70/week account-keeping fee). '
+            "Subject to credit approval; T&Cs apply. Confirm exact repayments "
+            "via Brighte's calculator, or ask about other finance options at "
+            'your consultation.',
             style: AppTypography.caption.copyWith(height: 1.5),
           ),
         ),

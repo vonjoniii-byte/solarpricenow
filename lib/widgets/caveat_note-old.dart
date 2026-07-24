@@ -8,8 +8,8 @@ import '../theme/typography.dart';
 import '../theme/app_theme.dart';
 
 const String kCaveatShort =
-    'Estimate only, based on your bill and typical WA usage. A free phone '
-    'consultation tailors this to your actual roof, shading, and usage.';
+    'Estimate only — based on your answers and typical Australian usage and '
+    'pricing. Your phone consultation confirms the exact figures.';
 
 const String kCaveatDetail =
     'Final pricing and system specifics are confirmed at a free phone '
